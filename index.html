@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Grisworth Gazette — Town of Grisworth</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Playfair+Display+SC:wght@400;700&family=Zilla+Slab:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --newsprint:   #f2ead8;
+    --newsprint-d: #e0d4bc;
+    --newsprint-dd:#c8bc9e;
+    --ink:         #1a1610;
+    --ink-soft:    #3a3228;
+    --ink-faint:   #7a6e5a;
+    --red:         #8b1a1a;
+    --red-pale:    #c43030;
+    --gold:        #8b6914;
+    --blue-civic:  #1a3a5c;
+    --blue-light:  #2a5a8c;
+    --green-power: #1a4a1a;
+    --amber:       #b85a00;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--newsprint-d);
+    color: var(--ink);
+    font-family: 'Zilla Slab', Georgia, serif;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Aged newsprint texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 23px, rgba(90,75,50,0.04) 23px, rgba(90,75,50,0.04) 24px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 2;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 0 100px;
+    background: var(--newsprint);
+    box-shadow: 0 0 60px rgba(0,0,0,0.25);
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    border-bottom: 3px double var(--ink);
+    padding: 20px 32px 0;
+    text-align: center;
+    background: var(--newsprint);
+    animation: fadeIn 0.8s ease both;
+  }
+
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--ink-faint);
+    font-family: 'Zilla Slab', serif;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ink-faint);
+    margin-bottom: 12px;
+  }
+
+  .paper-name {
+    font-family: 'Playfair Display SC', serif;
+    font-size: clamp(28px, 5vw, 58px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    line-height: 1;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .paper-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-soft);
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+  }
+
+  /* Power meter strip */
+  .power-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: var(--green-power);
+    margin: 10px -32px 0;
+  }
+
+  .power-label {
+    font-family: 'Playfair Display SC', serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #a0d0a0;
+    white-space: nowrap;
+  }
+
+  .power-bar {
+    flex: 1;
+    max-width: 300px;
+    height: 14px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .power-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2a8a2a, #80e080);
+    border-radius: 2px;
+    width: 73%;
+    animation: powerPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes powerPulse {
+    0%,100% { width: 73%; }
+    50%      { width: 78%; }
+  }
+
+  .power-reading {
+    font-family: 'Playfair Display SC', serif;
+    font-size: 11px;
+    color: #80e080;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+
+  /* ── COLUMNS LAYOUT ── */
+  .body-wrap {
+    padding: 0 32px;
+  }
+
+  /* ── COLUMN RULE ── */
+  .col-rule {
+    display: grid;
+    gap: 0;
+    position: relative;
+  }
+
+  .col-rule.two { grid-template-columns: 1fr 1px 1fr; }
+  .col-rule.three { grid-template-columns: 1fr 1px 1.4fr 1px 1fr; }
+
+  .col-divider {
+    background: var(--ink-faint);
+    opacity: 0.3;
+    margin: 12px 12px;
+  }
+
+  /* ── STORY HEADLINE ── */
+  .headline-banner {
+    border-top: 3px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    text-align: center;
+    padding: 16px 32px 14px;
+    margin: 20px 0 0;
+    animation: fadeIn 0.8s 0.2s ease both;
+  }
+
+  .kicker {
+    font-family: 'Playfair Display SC', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--red);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(28px, 5vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--red);
+  }
+
+  .deck {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--ink-soft);
+    margin-top: 8px;
+    line-height: 1.4;
+  }
+
+  /* Byline */
+  .byline {
+    font-family: 'Zilla Slab', serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--newsprint-dd);
+  }
+
+  /* ── BODY TEXT ── */
+  .story-col {
+    padding: 16px 12px;
+    animation: fadeIn 0.8s 0.4s ease both;
+  }
+
+  p {
+    font-size: 15px;
+    line-height: 1.82;
+    margin-bottom: 14px;
+    color: var(--ink);
+    font-weight: 300;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  p.intro {
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.7;
+  }
+
+  .dropcap::first-letter {
+    font-family: 'Playfair Display', serif;
+    font-size: 70px;
+    float: left;
+    line-height: 0.82;
+    margin: 6px 8px 0 0;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  em { font-style: italic; }
+
+  .cname {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+  }
+
+  /* ── OFFICIAL NOTICE BOX ── */
+  .notice-box {
+    border: 2px solid var(--ink);
+    padding: 14px 16px;
+    margin: 16px 0;
+    background: var(--newsprint-d);
+    position: relative;
+  }
+
+  .notice-box::before {
+    content: '⚠ OFFICIAL NOTICE';
+    font-family: 'Playfair Display SC', serif;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--red);
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    background: var(--newsprint-d);
+    padding: 0 6px;
+  }
+
+  .notice-box p {
+    font-size: 13px;
+    text-align: left;
+    margin-bottom: 8px;
+    line-height: 1.6;
+  }
+
+  .notice-box p:last-child { margin-bottom: 0; }
+
+  /* ── CIVIC COMPLAINT FORM ── */
+  .complaint-form {
+    border: 1.5px solid var(--ink);
+    padding: 16px;
+    margin: 20px 0;
+    background: var(--newsprint);
+    transform: rotate(0.3deg);
+    box-shadow: 2px 2px 0 var(--newsprint-dd);
+  }
+
+  .form-title {
+    font-family: 'Playfair Display SC', serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-align: center;
+    border-bottom: 1px solid var(--ink-faint);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    color: var(--blue-civic);
+  }
+
+  .form-field {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    align-items: baseline;
+    font-size: 11px;
+  }
+
+  .form-label {
+    font-family: 'Playfair Display SC', serif;
+    letter-spacing: 1px;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    font-size: 10px;
+    min-width: 80px;
+  }
+
+  .form-line {
+    flex: 1;
+    border-bottom: 1px solid var(--ink-faint);
+    font-family: 'Zilla Slab', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--ink-soft);
+    padding-bottom: 2px;
+    min-height: 16px;
+  }
+
+  .form-footer {
+    font-size: 9px;
+    color: var(--ink-faint);
+    text-align: center;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+    font-style: italic;
+  }
+
+  /* ── COMPLAINT POWER TABLE ── */
+  .power-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 12px;
+  }
+
+  .power-table th {
+    font-family: 'Playfair Display SC', serif;
+    font-size: 9px;
+    letter-spacing: 2px;
+    background: var(--ink);
+    color: var(--newsprint);
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  .power-table td {
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--newsprint-dd);
+    font-size: 12px;
+    font-family: 'Zilla Slab', serif;
+    vertical-align: middle;
+  }
+
+  .power-table tr:nth-child(even) td {
+    background: var(--newsprint-d);
+  }
+
+  .power-bar-mini {
+    display: inline-block;
+    height: 8px;
+    background: var(--green-power);
+    border-radius: 1px;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+
+  .power-val {
+    font-family: 'Playfair Display SC', serif;
+    font-size: 10px;
+    color: var(--green-power);
+  }
+
+  .power-val.low {
+    color: var(--red);
+  }
+
+  /* ── PULL QUOTE ── */
+  .pullquote {
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    padding: 12px 16px;
+    margin: 16px 0;
+    text-align: center;
+  }
+
+  .pullquote p {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(15px, 2.2vw, 19px);
+    line-height: 1.45;
+    text-align: center;
+    margin-bottom: 0;
+    color: var(--ink);
+  }
+
+  /* ── SUBHEADING ── */
+  .subhead {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--ink);
+    margin: 16px 0 6px;
+    border-bottom: 1px solid var(--ink-faint);
+    padding-bottom: 4px;
+  }
+
+  /* ── ADVERTISEMENT ── */
+  .advert {
+    border: 2px solid var(--ink);
+    padding: 14px;
+    margin: 16px 0;
+    text-align: center;
+    background: var(--newsprint-d);
+  }
+
+  .advert-head {
+    font-family: 'Playfair Display SC', serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .advert-body {
+    font-family: 'Zilla Slab', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  .advert-small {
+    font-size: 9px;
+    color: var(--ink-faint);
+    margin-top: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── HORIZONTAL RULE ── */
+  .h-rule {
+    border: none;
+    border-top: 1px solid var(--ink-faint);
+    margin: 16px 0;
+    opacity: 0.4;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    background: var(--ink);
+    color: var(--newsprint);
+    text-align: center;
+    padding: 6px 32px;
+    margin: 24px -32px 0;
+    font-family: 'Playfair Display SC', serif;
+    font-size: 11px;
+    letter-spacing: 5px;
+  }
+
+  /* ── GRISWORTH MAP SVG ── */
+  .map-wrap {
+    margin: 14px 0;
+    background: var(--newsprint-d);
+    border: 1px solid var(--ink-faint);
+    padding: 8px;
+  }
+
+  .map-caption {
+    font-size: 10px;
+    color: var(--ink-faint);
+    text-align: center;
+    font-style: italic;
+    margin-top: 6px;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    border-top: 3px double var(--ink);
+    padding: 12px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-top: 32px;
+  }
+
+  /* Animated complaint ticker */
+  .ticker {
+    background: var(--blue-civic);
+    color: #a0c0e0;
+    padding: 5px 32px;
+    margin: 0 -32px;
+    font-family: 'Playfair Display SC', serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .ticker-inner {
+    display: inline-block;
+    animation: tickerScroll 30s linear infinite;
+  }
+
+  @keyframes tickerScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .page { padding-bottom: 60px; }
+    .body-wrap { padding: 0 20px; }
+    .masthead { padding: 16px 20px 0; }
+    .power-strip { margin: 10px -20px 0; }
+    .section-header { margin: 24px -20px 0; }
+    .ticker { margin: 0 -20px; padding: 5px 20px; }
+    .footer { padding: 12px 20px; flex-direction: column; gap: 6px; text-align: center; }
+    .col-rule.two, .col-rule.three { grid-template-columns: 1fr; }
+    .col-divider { display: none; }
+    .headline-banner { padding: 14px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── MASTHEAD ── -->
+  <div class="masthead">
+    <div class="masthead-top">
+      <span>Est. 1842 · Vol. CLXXXIV</span>
+      <span>PRICE: One Complaint (Small) or Two Observations</span>
+      <span>GRISWORTH-UPON-GRUMBLE</span>
+    </div>
+    <div class="paper-name">The Grisworth Gazette</div>
+    <div class="paper-subtitle">Official Organ of the Municipal Complaints Authority</div>
+    <div class="power-strip">
+      <span class="power-label">CIVIC POWER</span>
+      <div class="power-bar"><div class="power-fill"></div></div>
+      <span class="power-reading">73% · GOOD GRUMBLING WEATHER</span>
+    </div>
+  </div>
+
+  <!-- ── TICKER ── -->
+  <div class="ticker">
+    <span class="ticker-inner">
+      BREAKING: Mildred Potts objects to the new lamppost colour (generating 4.2 watts) &nbsp;·&nbsp; COMPLAINT SURPLUS: Town hall reserves at 94% — residents urged to find new grievances &nbsp;·&nbsp; The No. 7 bus was four minutes late on Thursday: full inquiry launched (12.8 watts) &nbsp;·&nbsp; LOCAL MAN complains about the noise from the complaint office; complaint office powered by same complaint &nbsp;·&nbsp; WEATHER: Overcast with a high chance of mild dissatisfaction &nbsp;·&nbsp;
+      BREAKING: Mildred Potts objects to the new lamppost colour (generating 4.2 watts) &nbsp;·&nbsp; COMPLAINT SURPLUS: Town hall reserves at 94% — residents urged to find new grievances &nbsp;·&nbsp; The No. 7 bus was four minutes late on Thursday: full inquiry launched (12.8 watts) &nbsp;·&nbsp; LOCAL MAN complains about the noise from the complaint office; complaint office powered by same complaint &nbsp;·&nbsp; WEATHER: Overcast with a high chance of mild dissatisfaction &nbsp;·&nbsp;
+    </span>
+  </div>
+
+  <div class="body-wrap">
+
+    <!-- ── MAIN HEADLINE ── -->
+    <div class="headline-banner">
+      <span class="kicker">Town Feature · Civic Infrastructure</span>
+      <h1>The Town That Runs<br>on <em>Complaints</em></h1>
+      <p class="deck">A comprehensive account of Grisworth-upon-Grumble, its residents, its extraordinary municipal power system, and the visitor who nearly ruined everything by being perfectly content</p>
+      <div class="byline">By Our Special Correspondent · All facts verified by the Office of Grievances</div>
+    </div>
+
+    <!-- ── THREE COLUMN OPENER ── -->
+    <div class="col-rule three" style="margin-top:16px;">
+
+      <!-- COL 1 -->
+      <div class="story-col">
+        <p class="intro dropcap">
+          The town of Grisworth-upon-Grumble ran on complaints the way other towns ran on coal or wind or the water that turned the old mill wheel on the edge of Fenwick Road.
+        </p>
+        <p>
+          The infrastructure was straightforward, once you understood it. Each complaint filed at the Municipal Complaints Office on the high street generated a small but measurable quantity of power. A minor complaint (the bin collected late, the bread from Hassop's too dense) produced roughly two watts. A medium complaint, the kind that required a form and a follow-up letter, produced twelve to fifteen. A major complaint, filed in triplicate with supporting evidence, could power the town hall for a week.
+        </p>
+        <p>
+          The streetlights ran on a constant low-level hum of dissatisfaction. The school was heated by the parent evenings alone.
+        </p>
+
+        <!-- COMPLAINT FORM -->
+        <div class="complaint-form">
+          <div class="form-title">Form GC-7 — Standard Civic Complaint</div>
+          <div class="form-field">
+            <span class="form-label">Name:</span>
+            <span class="form-line">Mildred J. Potts</span>
+          </div>
+          <div class="form-field">
+            <span class="form-label">Nature:</span>
+            <span class="form-line">Lamppost colour (offensive)</span>
+          </div>
+          <div class="form-field">
+            <span class="form-label">Severity:</span>
+            <span class="form-line">Considerable · 4.2 watts est.</span>
+          </div>
+          <div class="form-field">
+            <span class="form-label">Desired outcome:</span>
+            <span class="form-line">Restoration of previous grey</span>
+          </div>
+          <div class="form-footer">
+            Filing this complaint powers approximately 6 minutes of street lighting.<br>
+            The Office thanks you for your service to the town.
+          </div>
+        </div>
+
+      </div>
+      <div class="col-divider"></div>
+
+      <!-- COL 2 — MAIN STORY CONTINUES + MAP -->
+      <div class="story-col">
+
+        <div class="subhead">A History of Municipal Feeling</div>
+
+        <p>
+          Nobody remembered who had first discovered the connection between complaints and energy. There was a plaque on the wall of the Complaints Office that said the system had been established in 1842 by the first Mayor, <span class="cname">Aldous Grimshaw</span>, after he noticed that the town felt livelier (the lights brighter, the fountains more vigorous) on the days when the market traders argued loudest. But the plaque had been installed by the second Mayor, who had reasons to flatter the first, and so the history was treated, like most history, as approximately true.
+        </p>
+        <p>
+          What was undisputed was that the system worked. The town was well-lit. The roads were smooth, funded by the residents' ongoing fury about the roads. The schools were excellent, powered by the universal conviction that they could be better. The hospital ran at full capacity on a permanent endowment of complaints about the hospital.
+        </p>
+
+        <!-- POWER TABLE -->
+        <table class="power-table">
+          <tr>
+            <th>Complaint Category</th>
+            <th>Avg. Watts</th>
+            <th>Output</th>
+          </tr>
+          <tr>
+            <td>Bin collections (late)</td>
+            <td>2.1w</td>
+            <td><span class="power-bar-mini" style="width:30px"></span><span class="power-val">Steady</span></td>
+          </tr>
+          <tr>
+            <td>Bread density (Hassop's)</td>
+            <td>3.4w</td>
+            <td><span class="power-bar-mini" style="width:44px"></span><span class="power-val">Reliable</span></td>
+          </tr>
+          <tr>
+            <td>Parish council decisions</td>
+            <td>14.7w</td>
+            <td><span class="power-bar-mini" style="width:80px"></span><span class="power-val">Excellent</span></td>
+          </tr>
+          <tr>
+            <td>The new lampposts</td>
+            <td>4.2w</td>
+            <td><span class="power-bar-mini" style="width:50px"></span><span class="power-val">Good</span></td>
+          </tr>
+          <tr>
+            <td>Unspecified general mood</td>
+            <td>0.8w</td>
+            <td><span class="power-bar-mini" style="width:12px" style="background:var(--amber)"></span><span class="power-val low">Low</span></td>
+          </tr>
+          <tr>
+            <td>Visitor satisfaction</td>
+            <td>−3.0w</td>
+            <td><span class="power-val low">⚠ NEGATIVE</span></td>
+          </tr>
+        </table>
+
+        <!-- MAP OF GRISWORTH -->
+        <div class="map-wrap">
+          <svg viewBox="0 0 340 200" fill="none" xmlns="http://www.w3.org/2000/svg" width="100%">
+            <rect width="340" height="200" fill="#e8dfc8"/>
+            <!-- Roads -->
+            <line x1="0" y1="100" x2="340" y2="100" stroke="#c8bc9e" stroke-width="8"/>
+            <line x1="170" y1="0" x2="170" y2="200" stroke="#c8bc9e" stroke-width="8"/>
+            <line x1="0" y1="60" x2="340" y2="140" stroke="#d4c8b0" stroke-width="4"/>
+            <!-- Road labels -->
+            <text x="170" y="92" font-family="Georgia" font-size="7" fill="#8a7a5a" text-anchor="middle" font-style="italic">High Street</text>
+            <!-- Town Hall — centre -->
+            <rect x="148" y="78" width="44" height="44" fill="#3a3228" rx="2"/>
+            <polygon points="170,60 148,78 192,78" fill="#1a1610"/>
+            <text x="170" y="107" font-family="Georgia" font-size="7" fill="#f2ead8" text-anchor="middle">TOWN HALL</text>
+            <text x="170" y="116" font-family="Georgia" font-size="6" fill="#80c080" text-anchor="middle">⚡ 94% full</text>
+            <!-- Complaints Office -->
+            <rect x="60" y="84" width="52" height="28" fill="#1a3a5c" rx="1"/>
+            <text x="86" y="97" font-family="Georgia" font-size="6.5" fill="#a0c0e0" text-anchor="middle">COMPLAINTS</text>
+            <text x="86" y="106" font-family="Georgia" font-size="6.5" fill="#a0c0e0" text-anchor="middle">OFFICE</text>
+            <!-- Hospital -->
+            <rect x="230" y="50" width="52" height="32" fill="#8b1a1a" rx="1"/>
+            <text x="256" y="65" font-family="Georgia" font-size="6.5" fill="#f0d0d0" text-anchor="middle">HOSPITAL</text>
+            <text x="256" y="74" font-family="Georgia" font-size="6" fill="#f0d0d0" text-anchor="middle">(self-powered)</text>
+            <!-- School -->
+            <rect x="228" y="118" width="52" height="32" fill="#8b6914" rx="1"/>
+            <text x="254" y="137" font-family="Georgia" font-size="6.5" fill="#f8f0d8" text-anchor="middle">SCHOOL</text>
+            <!-- Hassop's Bakery -->
+            <rect x="58" y="118" width="52" height="30" fill="#6b4423" rx="1"/>
+            <text x="84" y="132" font-family="Georgia" font-size="6.5" fill="#f8f0d8" text-anchor="middle">HASSOP'S</text>
+            <text x="84" y="141" font-family="Georgia" font-size="6" fill="#f8f0d8" text-anchor="middle">BAKERY</text>
+            <!-- Power lines -->
+            <line x1="112" y1="98" x2="148" y2="100" stroke="#1a4a1a" stroke-width="1" stroke-dasharray="3 2"/>
+            <line x1="192" y1="100" x2="228" y2="134" stroke="#1a4a1a" stroke-width="1" stroke-dasharray="3 2"/>
+            <line x1="192" y1="100" x2="230" y2="66" stroke="#1a4a1a" stroke-width="1" stroke-dasharray="3 2"/>
+            <line x1="110" y1="118" x2="148" y2="108" stroke="#1a4a1a" stroke-width="1" stroke-dasharray="3 2"/>
+            <!-- Compass -->
+            <text x="318" y="18" font-family="Georgia" font-size="10" fill="#7a6e5a" text-anchor="middle">N</text>
+            <line x1="318" y1="20" x2="318" y2="30" stroke="#7a6e5a" stroke-width="1"/>
+            <!-- River -->
+            <path d="M 0 170 Q 80 160 170 168 Q 260 176 340 165" stroke="#4a6a8a" stroke-width="6" fill="none" opacity="0.4"/>
+            <text x="170" y="180" font-family="Georgia" font-size="7" fill="#4a6a8a" text-anchor="middle" font-style="italic">River Grumble</text>
+          </svg>
+          <div class="map-caption">Fig. 1 — Schematic map of Grisworth-upon-Grumble. Dashed lines indicate complaint-power distribution routes.</div>
+        </div>
+
+      </div>
+      <div class="col-divider"></div>
+
+      <!-- COL 3 -->
+      <div class="story-col">
+
+        <div class="notice-box">
+          <p><strong>CIVIC NOTICE — Ref: GW/2024/881</strong></p>
+          <p>The Municipal Complaints Authority wishes to remind all residents that complaints must be filed in person, by post, or via the drop-box on the corner of Fenwick and Grimshaw Roads.</p>
+          <p>Complaining into the air, while appreciated in spirit, does not power the grid.</p>
+          <p>Residents generating fewer than 4 complaints per quarter are reminded that the minimum civic participation threshold is 4 complaints per quarter.</p>
+          <p style="color:var(--red)">Current quarter deficit: 3 residents. You know who you are.</p>
+        </div>
+
+        <div class="subhead">The Residents</div>
+        <p>
+          The residents of Grisworth were not, on the whole, unhappy people. This was a common misconception among outsiders, who visited expecting a grim and miserable town and found instead a place of remarkable civic pride, efficient services, and an unusually warm community spirit, all of which ran, without exception, on the energy of people being extremely vocal about the things that bothered them.
+        </p>
+        <p>
+          <span class="cname">Mrs. Bream</span> of number six Grimshaw Road had been the town's top contributor for eleven years. Her speciality was the pavements, which she considered uneven, and the speed of the post, which she considered unconscionable. She had powered the library refurbishment single-handedly.
+        </p>
+
+        <hr class="h-rule"/>
+
+        <div class="pullquote">
+          <p>"A complaint is not a cry of despair. It is an act of civic love. You only complain about things worth complaining about."</p>
+        </div>
+
+        <p style="font-size:11px; color:var(--ink-faint); font-style:italic; text-align:center; margin-top:-8px;">— Mayor Percival Grimshaw IV, Annual Address, 2019</p>
+
+        <!-- ADVERTISEMENT -->
+        <div class="advert">
+          <div class="advert-head">Hassop's Fine Bakery</div>
+          <div class="advert-body">
+            "Still Too Dense Since 1887"<br>
+            Your complaints keep our ovens lit.<br>
+            Literally.
+          </div>
+          <div class="advert-small">6 Grimshaw Road · Open Daily · Complaints Accepted at Counter</div>
+        </div>
+
+      </div>
+    </div><!-- end three col -->
+
+    <!-- ── SECTION BREAK — THE VISITOR ── -->
+    <div class="section-header">The Visitor — A Special Report</div>
+
+    <div class="col-rule two" style="margin-top:16px;">
+
+      <div class="story-col">
+        <div class="subhead">An Unusual Arrival</div>
+        <p>
+          The trouble began on a Wednesday in October, when a girl named <span class="cname">Nell</span> arrived in Grisworth on the twelve-fifteen coach from Alderswick, carrying a small bag and a temperament that the town, upon meeting it, found deeply alarming.
+        </p>
+        <p>
+          Nell was nine years old and possessed of a cheerful and accommodating nature. She found the town charming. She found the bread at Hassop's delicious, with good heft to it. She found the pavements characterful. When the No. 7 bus was four minutes late, she said, "That's all right, I wasn't in a hurry," which produced a small but measurable dip in the streetlight output on the corner of Fenwick Road.
+        </p>
+        <p>
+          Her aunt, <span class="cname">Mrs. Vicker</span>, who had lived in Grisworth for forty years and generated a reliable eighteen to twenty watts per week, watched her niece with concern.
+        </p>
+        <p>
+          "You'll need to find something," said Mrs. Vicker at dinner.
+        </p>
+        <p>
+          "Something?" said Nell.
+        </p>
+        <p>
+          "Something to complain about."
+        </p>
+        <p>
+          Nell considered this. "The salt cellar's a bit stiff," she offered.
+        </p>
+        <p>
+          Mrs. Vicker checked the reading on the small power gauge she kept on the kitchen windowsill, a fixture common to all Grisworth households. The needle had moved less than a millimetre.
+        </p>
+        <p>
+          "That's not a complaint," said Mrs. Vicker, not unkindly. "That's an observation."
+        </p>
+
+        <div class="notice-box" style="margin-top:16px;">
+          <p><strong>EMERGENCY POWER ADVISORY</strong></p>
+          <p>The Municipal Authority recorded a 6.3% drop in overnight generation on Wednesday. Meteorological causes have been ruled out.</p>
+          <p>Residents near Fenwick Road are asked to check their gauges and file a minimum of two additional complaints before Friday.</p>
+          <p style="color:var(--red)">The hospital is currently on amber reserves.</p>
+        </div>
+      </div>
+
+      <div class="col-divider"></div>
+
+      <div class="story-col">
+        <div class="subhead">The Crisis</div>
+        <p>
+          By Thursday the power deficit had been traced directly to Nell's presence by the Chief Complaints Engineer, a meticulous man named <span class="cname">Mr. Hatch</span>, who had never in his professional life encountered a negative contributor.
+        </p>
+        <p>
+          "She doesn't generate," he told the Emergency Civic Committee, which had convened in the town hall over biscuits that everyone agreed were not quite right, which helped. "She <em>absorbs.</em> When she says something is fine, it costs us. When she says something is lovely, the hospital loses a watt."
+        </p>
+        <p>
+          "What happens if she says something is <em>wonderful?</em>" asked Councillor Fry.
+        </p>
+        <p>
+          Mr. Hatch checked his notes. "We haven't modelled that. I'd rather not find out."
+        </p>
+        <p>
+          The committee discussed the matter for two hours, which powered four streetlights and the north wing of the school. Several proposals were made, including a polite note asking Nell to leave, a civic bylaw requiring minimum dissatisfaction levels from visitors, and a scheme to assign her a personal complaint mentor.
+        </p>
+        <p>
+          They settled on the mentor. <span class="cname">Mrs. Bream</span> volunteered immediately.
+        </p>
+
+        <hr class="h-rule"/>
+
+        <div class="subhead">The Mentorship</div>
+        <p>
+          Mrs. Bream arrived at Mrs. Vicker's house at eight on Friday morning with a notebook, a list of grievances, and forty years of practice.
+        </p>
+        <p>
+          "The object," she told Nell, who was eating toast and looking out at the grey October morning with apparent pleasure, "is not to be miserable. The object is to care. About things. Enough to say so."
+        </p>
+        <p>
+          Nell thought about this. "The toast is a bit cold."
+        </p>
+        <p>
+          The kitchen gauge twitched. One and a half watts.
+        </p>
+        <p>
+          "Better," said Mrs. Bream. "Now. The pavements."
+        </p>
+      </div>
+    </div>
+
+    <!-- ── FULL WIDTH CLOSING ── -->
+    <div class="story-col" style="padding: 0 12px;">
+
+      <div class="col-rule two">
+        <div style="padding-right:24px;">
+          <p>
+            Over the following three days, Mrs. Bream walked Nell around every street in Grisworth with the patience of a very experienced teacher and the enthusiasm of someone who genuinely loved what she was teaching. She showed Nell the pavement outside the post office that had been uneven since 2004 and the council's seventeen responses over eighteen years. She showed her the bus timetable and the gap between the printed times and the actual times, which she maintained was a gap of significance.
+          </p>
+          <p>
+            She showed her Hassop's bread, which was, if you paid attention, genuinely too dense. Not inedibly so. But objectively more dense than bread needed to be, and the denseness had a quality of intention to it, as though Mr. Hassop considered density a virtue, which it was not, not in bread.
+          </p>
+          <p>
+            Nell tried a piece and chewed thoughtfully.
+          </p>
+          <p>
+            "He could have gone lighter on the proving time," she said.
+          </p>
+          <p>
+            Mr. Hassop, who was standing behind the counter, looked up sharply.
+          </p>
+          <p>
+            The gauge on the wall jumped to twelve watts. The lights brightened visibly. The till rang for no reason.
+          </p>
+          <p>
+            "That," said Mrs. Bream, with deep satisfaction, "is a complaint."
+          </p>
+        </div>
+        <div class="col-divider"></div>
+        <div style="padding-left:24px;">
+          <p>
+            By the following Wednesday Nell had filed four complaints with the Municipal Office: the proving time, the pavement, a drain on the corner of Marsh Street that made an unsatisfactory noise in the rain, and a more philosophical complaint about the placement of the town's single bench, which faced away from the river and toward the back wall of the hardware shop, which she felt was a decision that reflected poorly on whoever had made it.
+          </p>
+          <p>
+            The bench complaint alone generated nine watts and prompted an emergency meeting of the Parks Sub-Committee.
+          </p>
+          <p>
+            The bench was turned to face the river by the end of the month.
+          </p>
+          <p>
+            Nell said it was much better, which cost them two watts, but everyone agreed this was a reasonable trade.
+          </p>
+          <p>
+            She came back the following summer, and the summer after that, and eventually she stopped being a visitor and became a resident, which required a formal registration at the Complaints Office and a minimum commitment of four complaints per quarter and a small ceremony with biscuits.
+          </p>
+          <p>
+            The biscuits, she noted, were slightly stale.
+          </p>
+          <p>
+            The lights came on.
+          </p>
+        </div>
+      </div>
+
+      <div style="text-align:center; padding: 40px 0 24px; border-top: 2px solid var(--ink); margin-top: 24px;">
+        <span style="font-family:'Playfair Display SC', serif; font-size:11px; letter-spacing:5px; color:var(--ink-faint);">— End —</span>
+      </div>
+
+    </div>
+  </div><!-- end body-wrap -->
+
+  <!-- ── FOOTER ── -->
+  <div class="footer">
+    <span>The Grisworth Gazette © MCMXLII–Present</span>
+    <span>All complaints property of the Municipal Authority</span>
+    <span>Printed on paper. Powered by grievance.</span>
+  </div>
+
+</div>
+</body>
+</html>
