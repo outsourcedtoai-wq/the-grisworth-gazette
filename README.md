@@ -1,2 +1,2 @@
-# the-glitter-problem
-A short story about Vera Finch, a girl who sneezes glitter whenever someone lies—and what honesty really costs.
+# the-grisworth-gazette
+A fable about Grisworth, a town powered by its residents' complaints, and the visitor whose contentment nearly drains the grid.
